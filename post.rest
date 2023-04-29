@@ -1,0 +1,30 @@
+@baseURL=http://localhost:8080/api/v1/post 
+
+### 
+GET {{baseURL}}
+
+
+###
+POST {{baseURL}}
+Content-Type: application/json
+
+{
+    "AuthorName":"Meghana",
+    "content":"I am good3"
+}
+
+###
+PUT {{baseURL}}/1
+Content-Type: application/json
+
+{
+    "AuthorName":"Meghana",
+    "content":"I am good"
+}
+
+###
+DELETE {{baseURL}}/2
+
+###
+GET {{baseURL}}/1
+

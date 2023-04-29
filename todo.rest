@@ -1,0 +1,28 @@
+###
+@baseURL=http://localhost:8080/api/v1/listItem
+
+
+### ALL ITEMS
+GET {{baseURL}}
+
+
+### CREATE ITEM
+POST {{baseURL}}
+Content-Type: application/json
+
+{
+    "content":"Third Project"
+}
+
+
+### UPDATE AN ITEM AS COMPLETED
+PUT {{baseURL}}/1
+Content-Type: application/json
+
+{
+    "content":"First Project",
+    "isCompleted":true
+}
+
+### DELETE AN ITEM
+DELETE {{baseURL}}/4
