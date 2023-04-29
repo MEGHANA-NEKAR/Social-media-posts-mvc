@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Social Media Posts</title>
+  <!-- Include necessary CSS and JavaScript libraries -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Social Media Posts</h1>
+
+    <!-- Section for creating a post -->
+    <div id="create-post-section">
+      <h2>Create a Post</h2>
+      <form id="createPostForm">
+        <div class="form-group">
+          <label for="authorName">Author Name:</label>
+          <input type="text" class="form-control" id="authorName" name="authorName" required>
+        </div>
+        <div class="form-group">
+          <label for="content">Content:</label>
+          <textarea class="form-control" id="content" name="content" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+      </form>
+    </div>
+
+    <!-- Section for viewing all posts -->
+    <div id="view-posts-section">
+      <h2>View Posts</h2>
+      <div id="posts"></div>
+    </div>
+
+    <!-- Modal for editing a post -->
+    <div class="modal fade" id="editPostModal" tabindex="-1" role="dialog" aria-labelledby="editPostModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="editPostModalLabel">Edit Post</h4>
+          </div>
+          <div class="modal-body">
+            <form id="editPostForm">
+              <input type="hidden" id="editPostId" name="postId">
+              <div class="form-group">
+                <label for="editAuthorName">Author Name:</label>
+                <input type="text" class="form-control" id="editAuthorName" name="authorName" required>
+              </div>
+              <div class="form-group">
+                <label for="editContent">Content:</label>
+                <textarea class="form-control" id="editContent" name="content" required></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="editPostButton">Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section for deleting a post -->
+    <div id="delete-post-section">
+      <h2>Delete a Post</h2>
+      <form id="deletePostForm">
+        <div class="form-group">
+          <label for="deletePostId">Post ID:</label>
+          <input type="text" class="form-control" id="deletePostId" name="postId" readonly>
+        </div>
+        <button type="submit" class="btn btn-danger" >Delete</button>
+        </form>
+        </div>
+      </div>
+
+      <script>
+        $(document).ready(function() {
+          // Function to get all posts
+          function getAllPosts() {
+            $.ajax({
+              type: "GET",
+              url: "/api/v1/post",
+              success: function(posts) {
+                var postsHtml = "";
+                $.each(posts, function(index, post) {
+                  postsHtml += "<div class='panel panel-default'>";
+                  postsHtml += "<div class='panel-heading'>";
+                  postsHtml += "<h3 class='panel-title'>" + post.authorName + "</h3>";
+                  postsHtml += "</div>";
+                  postsHtml += "<div class='panel-body'>" + post.content + "</div>";
+                  postsHtml += "<div class='panel-footer'>";
+                  postsHtml += "<button class='btn btn-primary edit-post' data-post-id='" + post.postId + "'>Edit</button>";
+                  postsHtml += "<button class='btn btn-danger delete-post' data-post-id='" + post.postId + "'>Delete</button>";
+                  postsHtml += "</div>";
+                  postsHtml += "</div>";
+                });
+                $("#posts").html(postsHtml);
+              }
+            });
+          }
+      
+          // Get all posts on page load
+          getAllPosts();
+      
+          // Create a post
+          $("#createPostForm").submit(function(event) {
+            event.preventDefault();
+            var authorName = $("#authorName").val();
+            var content = $("#content").val();
+            $.ajax({
+              type: "POST",
+              url: "/api/v1/post",
+              data: JSON.stringify({ AuthorName: authorName, content: content }),
+              dataType: 'json',
+              contentType: 'application/json; charset=utf-8',
+              success: function() {
+                getAllPosts();
+                $("#createPostForm")[0].reset();
+              }
+            });
+          });
+
+//           // Update a post
+// $(".edit-post").click(function() {
+//   var postId = $(this).data("post-id");
+//   $.ajax({
+//     type: "GET",
+//     url: "/api/posts/" + postId,
+//     success: function(post) {
+//       $("#editPostId").val(post._id);
+//       $("#editAuthorName").val(post.authorName);
+//       $("#editContent").val(post.content);
+//       $("#editPostModal").modal("show");
+//     }
+//   });
+// });
+
+// $("#editPostForm").submit(function(event) {
+//   event.preventDefault();
+//   var postId = $("#editPostId").val();
+//   var authorName = $("#editAuthorName").val();
+//   var content = $("#editContent").val();
+//   $.ajax({
+//     type: "PUT",
+//     url: "/api/posts/" + postId,
+//     data: { authorName: authorName, content: content },
+//     success: function() {
+//       getAllPosts();
+//       $("#editPostModal").modal("hide");
+//     }
+//   });
+// });
+
+      
+          // Edit a post
+          $("#editPostButton").click(function() {
+            var postId = $("#editPostId").val();
+            var authorName = $("#editAuthorName").val();
+            var content = $("#editContent").val();
+            $.ajax({
+              type: "PUT",
+              url: "/api/v1/post/" + postId,
+              data: JSON.stringify({ AuthorName: authorName, content: content }),
+              dataType: 'json',
+              contentType: 'application/json; charset=utf-8',
+              success: function() {
+                alert("Edited post");
+                getAllPosts();
+                $("#editPostModal").modal("hide");
+              }
+            });
+          });
+      
+          // Populate edit post modal with post data
+          $(document).on("click", ".edit-post", function() {
+            var postId = $(this).data("post-id");
+            $.ajax({
+              type: "GET",
+              url: "/api/v1/post/" + postId,
+              success: function(post) {
+                $("#editPostId").val(post._id);
+                $("#editAuthorName").val(post.authorName);
+                $("#editContent").val(post.content);
+                $("#editPostModal").modal("show");
+              }
+            });
+          });
+      
+          // Delete a post
+          $("#deletePostForm").submit(function(event) {
+            event.preventDefault();
+            var postId = $("#deletePostId").val();
+            $.ajax({
+              type: "DELETE",
+              url: "/api/v1/post/" + postId,
+              success: function() {
+                getAllPosts();
+                $("#deletePostForm")[0].reset();
+              }
+            });
+          });
+      
+          // Edit button click handler
+$(document).on("click", ".edit-post", function() {
+  var postId = $(this).data("post-id");
+  $.ajax({
+    type: "GET",
+    url: "/api/v1/post/" + postId,
+    success: function(post) {
+      $("#editPostId").val(post.postId);
+      $("#editAuthorName").val(post.authorName);
+      $("#editContent").val(post.content);
+      $("#editPostModal").modal("show");
+    }
+  });
+});
+
+
+  // Show modal to delete post
+  $(document).on("click", ".delete-post", function() {
+        var postId = $(this).data("postId");
+        $("#deletePostId").val(postId);
+        $("#deletePostModal").modal("show");
+      });
+    });
+  </script>
+</body>
+</html>
